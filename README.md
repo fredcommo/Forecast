@@ -7,5 +7,5 @@
 python demo.py
 ``` 
 #### Example output
-![plot](plots\Figure_1.png)
+![plot](plots/Figure_1.png)
 
