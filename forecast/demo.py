@@ -1,13 +1,13 @@
 import os
 import pandas as pd
 
-from forecast.utils import (
+from utils import (
     date_to_timestamp,
     timestamp_to_daily_sin_cos,
     timestamp_to_yearly_sin_cos
     )
 
-from forecast.timeseries import TimeSeries
+from timeseries import TimeSeries
 
 def main():
     path = "data"
