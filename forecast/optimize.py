@@ -9,7 +9,7 @@ XGBReg = xgb.XGBRegressor
 
 from sklearn import model_selection
 
-from forecast.optimizers import(
+from optimizers import(
     LinearRegression_optimizer,
     Ridge_optimizer,
     Lasso_optimizer,
