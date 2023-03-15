@@ -1,4 +1,5 @@
 *__pycache__*
 Notebooks/
 *egg-info/
+build/
 dist/
