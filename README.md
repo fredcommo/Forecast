@@ -7,7 +7,7 @@
 python forecast/demo.py
 ``` 
 
-### Alternatively, after cloning:
+#### Alternatively, after cloning:
 ```bash
 python -m pip install -e .
 demo
