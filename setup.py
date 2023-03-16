@@ -12,8 +12,9 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/fredcommo/Forecast",
-    package_dir={"": "forecast"},
-    packages=setuptools.find_packages(where="forecast"),
+    # package_dir={"forecast": "forecast"},
+    packages=["forecast"],
+    # packages=setuptools.find_packages(where="Forecast"),
     install_requires=[
         'matplotlib==3.6.3',
         'numpy==1.24.1',
