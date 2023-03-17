@@ -29,7 +29,7 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     include_package_data=True,
-    package_data={'forecast': ['data/*.csv']},
+    package_data={'': ['data/*.csv']},
     entry_points={'console_scripts': ['demo=forecast.demo:main']},
     python_requires='>=3.8',
 )
