@@ -34,6 +34,7 @@ def objective(trial, Xtrain, ytrain, model_list, njobs):
         classifier_obj,
         Xtrain, ytrain,
         n_jobs=njobs,
+        scoring="neg_mean_squared_error",
         cv=5,
         error_score=0
     )
@@ -84,8 +85,6 @@ def optimize(self, model_list, timeout=3*60, njobs=2, n_trials=5):
 
     self.study = study
 
-# TimeSeries.optimze = optimize
-
 ##########################################
 # Additional methods
 ##########################################
@@ -108,14 +107,27 @@ def get_best_model(self):
 
     ############################################
     # Getting the best result
-    print(f"\nBest accuracy: {best_value}")
+    print(f"\nLowest neg-MSE: {best_value}")
     print(f"Best algorithm: {best_model}")
     print(f"Best parameters (ready to use): {best_params}\n")
 
     return best_model, best_params
 
-def performance(model):
-    pass
+def wape(self):
+    if not hasattr(self, 'model'):
+        print("No saved trained model yet. Please run first ts.train_best_model()")
+        return np.nan
+    
+    ytest = self.get_ytest()
+    yhat = self.predict("test")
+    if any(ytest < 0):
+        m = np.nanmin(ytest)
+        ytest = ytest - m + 1
+        yhat = yhat - m + 1
+    abs_diff = np.abs(ytest - yhat)
+    
+    return 1 - np.nansum(abs_diff) / np.nansum(ytest)    
+
 
 def train_best_model(self):
 
@@ -157,7 +169,8 @@ def plot(self):
     plt.plot(date_time[-self.test_len:], ytest, linewidth=3, label="Observed")
     plt.plot(date_time[-self.test_len:], test_pred, linewidth=3, c='orange', label="predicted")
 
-    plt.title(f"Best model: {best_model}, accuracy: {best_value:.4f}", fontsize=22)
+    title = f"Best model: {best_model}, lowest neg-MSE: {best_value:.4f}, WAPE: {self.wape():.3f}"
+    plt.title(title, fontsize=22)
     plt.xlabel('Time', fontsize=18)
     plt.xticks(fontsize=14)
     plt.ylabel('Values', fontsize=18)
@@ -165,8 +178,3 @@ def plot(self):
     plt.legend(fontsize=14)
 
     plt.show()
-
-
-# TimeSeries.get_best_model = get_best_model
-# TimeSeries.train_best_model = train_best_model
-# TimeSeries.predict = predict
