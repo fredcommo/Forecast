@@ -7,6 +7,7 @@ from forecast.optimize import(
     get_best_model,
     train_best_model,
     predict,
+    wape,
     plot
 )
 
@@ -33,10 +34,10 @@ class TimeSeries():
         self.y = self.y[idx]
         
     def _train_test_split(self):
-        self.Xtrain = self.X.iloc[:-self.test_len,:]
-        self.ytrain = self.y[:-self.test_len]
-        self.Xtest = self.X.iloc[-self.test_len:,:]
-        self.ytest = self.y[-self.test_len:]
+        self.Xtrain = np.array(self.X.iloc[:-self.test_len,:])
+        self.ytrain = np.array(self.y[:-self.test_len]).reshape(-1, 1)
+        self.Xtest = np.array(self.X.iloc[-self.test_len:,:])
+        self.ytest = np.array(self.y[-self.test_len:]).reshape(-1, 1)
 
     def get_Xtrain(self):
         return self.Xtrain
@@ -54,4 +55,5 @@ TimeSeries.optimize = optimize
 TimeSeries.get_best_model = get_best_model
 TimeSeries.train_best_model = train_best_model
 TimeSeries.predict = predict
+TimeSeries.wape = wape
 TimeSeries.plot = plot
