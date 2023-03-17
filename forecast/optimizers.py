@@ -58,7 +58,10 @@ def ElasticNet_optimizer(trial):
 @optimizer(XGBReg)
 def XGBReg_optimizer(trial):
     params = {
-        "learning_rate": trial.suggest_float("xgbr_learning_rate", 0.1, 1, step=0.1),
-        "n_estimators": trial.suggest_categorical("xgbr_n_estimators", [200, 500, 1000])
+        "learning_rate": trial.suggest_float("xgbr_learning_rate", 0.05, 0.2, step=0.05),
+        "n_estimators": trial.suggest_categorical("xgbr_n_estimators", [200, 500, 1000]),
+        "booster": "gblinear",
+        "reg_alpha": trial.suggest_float("xgbr_reg_alpha", 0.1, 1, step=0.1),
+        "reg_lambda": trial.suggest_float("xgbr_reg_lambda", 0.1, 1, step=0.1)
         }
     return params
