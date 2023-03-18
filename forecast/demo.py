@@ -23,8 +23,8 @@ def main():
     ts = TimeSeries(df, y='T (degC)', lags=48)
 
     # Optimize, then compute and plot predictions on test set
-    # model_list=["LinearRegression", "Ridge", "Lasso", "ElasticNet"]
-    model_list=["LinearRegression", "Ridge", "Lasso", "ElasticNet", "XGBReg"]
+    model_list=["LinearRegression", "Ridge", "Lasso", "ElasticNet"]
+    # model_list=["LinearRegression", "Ridge", "Lasso", "ElasticNet", "XGBReg"]
     # model_list=["XGBReg"]
 
     print("Testing:\n-", "\n- ".join(model_list))
