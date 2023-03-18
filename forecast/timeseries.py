@@ -12,12 +12,12 @@ from forecast.optimize import(
 )
 
 class TimeSeries():
-    def __init__(self, df, y, date_col="Date Time", lags=16, test_len=24):
+    def __init__(self, df, y, date_col="Date Time", lags=16, test_size=24):
         self.date_time = df[date_col] if is_datetime(df[date_col]) else pd.to_datetime(df[date_col])
         self.y = df[y]
         self.X = df.drop(columns=[y, date_col])
         self.lags = lags
-        self.test_len = test_len
+        self.test_size = test_size
         
         self._add_lags()
         self._train_test_split()
@@ -34,10 +34,10 @@ class TimeSeries():
         self.y = self.y[idx]
         
     def _train_test_split(self):
-        self.Xtrain = np.array(self.X.iloc[:-self.test_len,:])
-        self.ytrain = np.array(self.y[:-self.test_len]).reshape(-1, 1)
-        self.Xtest = np.array(self.X.iloc[-self.test_len:,:])
-        self.ytest = np.array(self.y[-self.test_len:]).reshape(-1, 1)
+        self.Xtrain = np.array(self.X.iloc[:-self.test_size,:])
+        self.ytrain = np.array(self.y[:-self.test_size]).reshape(-1, 1)
+        self.Xtest = np.array(self.X.iloc[-self.test_size:,:])
+        self.ytest = np.array(self.y[-self.test_size:]).reshape(-1, 1)
 
     def get_Xtrain(self):
         return self.Xtrain

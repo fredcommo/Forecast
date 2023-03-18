@@ -20,7 +20,7 @@ def main():
     df['Year sin'], df['Year cos'] = timestamp_to_yearly_sin_cos(timestamp_s)
 
     # Create a TimeSeries object
-    ts = TimeSeries(df, y='T (degC)', lags=72)
+    ts = TimeSeries(df, y='T (degC)', lags=48)
 
     # Optimize, then compute and plot predictions on test set
     # model_list=["LinearRegression", "Ridge", "Lasso", "ElasticNet"]
