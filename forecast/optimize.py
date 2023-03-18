@@ -116,7 +116,7 @@ def get_best_model(self):
 
     ############################################
     # Getting the best result
-    print(f"\nLowest neg-MSE: {best_value}")
+    print(f"\nBest performance: {best_value:.3f}")
     print(f"Best algorithm: {best_model}")
     print(f"Best parameters (ready to use): {best_params}\n")
 
