@@ -21,8 +21,8 @@ from forecast.optimizers import(
 from forecast.metrics import wape
 
 #############################################################################
-# Uncomment the line below if you don't want job prints on terminal:
-# optuna.logging.set_verbosity(optuna.logging.WARNING)
+# Uncomment/comment the line below if you want/don't want to print jobs on terminal:
+optuna.logging.set_verbosity(optuna.logging.WARNING)
 #############################################################################
 
 def logging_callback(study, frozen_trial):
@@ -86,7 +86,7 @@ def optimize(self, model_list, timeout=3*60, njobs=2, n_trials=10):
         n_trials=n_trials,
         n_jobs=njobs,
         timeout=timeout,
-        # Uncomment the line below if you want to see the progress bar on terminal
+        # Uncomment/comment the line below if you want to see/not see the progress bar on terminal
         show_progress_bar=True,
         gc_after_trial=True,
         callbacks=[logging_callback]
