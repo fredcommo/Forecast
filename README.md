@@ -20,3 +20,10 @@ demo
 
 ![plot](plots/Figure_1.png)
 
+
+### TODO:
+* Compute weekly avg, monthly avg in ts constructor
+* Detect datetime granularity, so not all avg are allowed, nor all sin/cos transformation
+* Wrap models so lags becomes a par to optimize
+* Use TimeSeries split for CV strategy: done
+* Use wape (or other metrics) as the value to maximize: done
