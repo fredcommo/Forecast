@@ -28,7 +28,7 @@ def main():
     # model_list=["XGBReg"]
 
     print("Testing:\n-", "\n- ".join(model_list))
-    ts.optimize(model_list=model_list, timeout=5*60, n_trials=20)
+    ts.optimize(model_list=model_list, timeout=5*60, n_trials=30)
     ts.train_best_model()
     ts.plot()
 
