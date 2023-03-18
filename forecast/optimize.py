@@ -7,7 +7,8 @@ from sklearn.linear_model import LinearRegression, Ridge, Lasso, ElasticNet
 import xgboost as xgb
 XGBReg = xgb.XGBRegressor
 
-from sklearn import model_selection
+from sklearn.model_selection import cross_val_score, TimeSeriesSplit
+from sklearn.metrics import make_scorer
 
 from forecast.optimizers import(
     LinearRegression_optimizer,
@@ -17,30 +18,12 @@ from forecast.optimizers import(
     XGBReg_optimizer
 )
 
+from forecast.metrics import wape
+
 #############################################################################
 # Uncomment the line below if you don't want job prints on terminal:
 # optuna.logging.set_verbosity(optuna.logging.WARNING)
 #############################################################################
-
-def objective(trial, Xtrain, ytrain, model_list, njobs):
-
-    # Setup values for the hyperparameters optimization:
-    classifier_name = trial.suggest_categorical("classifier", model_list)
-    classifier_optimizer = f"{classifier_name}_optimizer"
-    classifier_obj = eval(classifier_optimizer)(trial)
-
-    # Scoring method:
-    score = model_selection.cross_val_score(
-        classifier_obj,
-        Xtrain, ytrain,
-        n_jobs=njobs,
-        scoring="neg_mean_squared_error",
-        cv=5,
-        error_score=0
-    )
-
-    return score.mean()
-
 
 def logging_callback(study, frozen_trial):
     previous_best_value = study.user_attrs.get("previous_best_value", None)
@@ -58,7 +41,33 @@ def logging_callback(study, frozen_trial):
             )
         )
 
-def optimize(self, model_list, timeout=3*60, njobs=2, n_trials=5):
+
+def objective(trial, Xtrain, ytrain, test_size, model_list, njobs):
+
+    # Setup values for the hyperparameters optimization:
+    classifier_name = trial.suggest_categorical("classifier", model_list)
+    classifier_optimizer = f"{classifier_name}_optimizer"
+    classifier_obj = eval(classifier_optimizer)(trial)
+
+    Xtrain = np.array(Xtrain)
+    ytrain = np.array(ytrain).reshape(-1, 1)
+    
+    # Scoring method:
+    score = cross_val_score(
+        classifier_obj,
+        Xtrain, ytrain,
+        n_jobs=njobs,
+#         scoring="neg_mean_squared_error",
+#         scoring="neg_mean_absolute_percentage_error",
+        scoring=make_scorer(wape, greater_is_better=True),
+        cv=TimeSeriesSplit(n_splits=5, test_size=test_size),
+        error_score=0
+    )
+
+    return score.mean()
+
+
+def optimize(self, model_list, timeout=3*60, njobs=2, n_trials=10):
     """
     Run optimizer
     note: to pass args to the objective func, wrap it inside a lambda func + args
@@ -70,7 +79,7 @@ def optimize(self, model_list, timeout=3*60, njobs=2, n_trials=5):
     Xtrain = self.get_Xtrain()
     ytrain = self.get_ytrain()
     
-    objective_func = lambda trial: objective(trial, Xtrain, ytrain, model_list, njobs)
+    objective_func = lambda trial: objective(trial, Xtrain, ytrain, self.test_size, model_list, njobs)
     study = optuna.create_study(direction="maximize")
     study.optimize(
         objective_func,
@@ -78,7 +87,7 @@ def optimize(self, model_list, timeout=3*60, njobs=2, n_trials=5):
         n_jobs=njobs,
         timeout=timeout,
         # Uncomment the line below if you want to see the progress bar on terminal
-        # show_progress_bar=True,
+        show_progress_bar=True,
         gc_after_trial=True,
         callbacks=[logging_callback]
         )
@@ -113,21 +122,6 @@ def get_best_model(self):
 
     return best_model, best_params
 
-def wape(self):
-    if not hasattr(self, 'model'):
-        print("No saved trained model yet. Please run first ts.train_best_model()")
-        return np.nan
-    
-    ytest = self.get_ytest()
-    yhat = self.predict("test")
-    if any(ytest < 0):
-        m = np.nanmin(ytest)
-        ytest = ytest - m + 1
-        yhat = yhat - m + 1
-    abs_diff = np.abs(ytest - yhat)
-    
-    return 1 - np.nansum(abs_diff) / np.nansum(ytest)    
-
 
 def train_best_model(self):
 
@@ -147,9 +141,9 @@ def train_best_model(self):
 def predict(self, what="train"):
     model = self.model
     if what == "train":
-        return model.predict(np.array(self.get_Xtrain()))
+        return model.predict(np.array(self.get_Xtrain())).reshape(-1, 1)
     elif what == "test":
-        return model.predict(np.array(self.get_Xtest()))
+        return model.predict(np.array(self.get_Xtest())).reshape(-1, 1)
     else:
         return None
 
@@ -160,16 +154,16 @@ def plot(self):
     best_params = study.best_params
     best_model = best_params.pop('classifier')
 
-    ytest = self.get_ytest().tolist()
-    test_pred = self.predict("test")
+    y = self.get_ytest()
+    yhat = self.predict("test")
     date_time = self.date_time
     
     plt.figure(figsize=(18, 8))
 
-    plt.plot(date_time[-self.test_len:], ytest, linewidth=3, label="Observed")
-    plt.plot(date_time[-self.test_len:], test_pred, linewidth=3, c='orange', label="predicted")
+    plt.plot(date_time[-self.test_size:], y, linewidth=3, label="Observed")
+    plt.plot(date_time[-self.test_size:], yhat, linewidth=3, c='orange', label="predicted")
 
-    title = f"Best model: {best_model}, lowest neg-MSE: {best_value:.4f}, WAPE: {self.wape():.3f}"
+    title = f"Best model: {best_model}, Best metrics (CV): {best_value:.4f}, WAPE: {wape(y, yhat):.3f}"
     plt.title(title, fontsize=22)
     plt.xlabel('Time', fontsize=18)
     plt.xticks(fontsize=14)
