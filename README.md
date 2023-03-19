@@ -22,8 +22,9 @@ demo
 
 
 ### TODO:
-* Compute weekly avg, monthly avg in ts constructor
+* Compute weekly avg, monthly avg in ts constructor: done but not in ts constructor
 * Detect datetime granularity, so not all avg are allowed, nor all sin/cos transformation
 * Wrap models so lags becomes a par to optimize
 * Use TimeSeries split for CV strategy: done
 * Use wape (or other metrics) as the value to maximize: done
+* Add feature importance diagnostic
