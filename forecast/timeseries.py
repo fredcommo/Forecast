@@ -22,17 +22,34 @@ class TimeSeries():
         self._add_lags()
         self._train_test_split()
         
+    # def _add_lags(self):
+    #     if self.lags < 1:
+    #         return
+    #     for i in range(1, self.lags + 1, 1):
+    #         self.X[f"lag_{i}"] = [np.nan]*i + list(self.y[:-i])
+
+    #     idx = ~self.X[f"lag_{self.lags}"].isna()
+    #     self.date_time = self.date_time[idx]
+    #     self.X = self.X[idx]
+    #     self.y = self.y[idx]
+
     def _add_lags(self):
+
         if self.lags < 1:
             return
-        for i in range(1, self.lags + 1, 1):
-            self.X[f"lag_{i}"] = [np.nan]*i + list(self.y[:-i])
+
+        def _lag_to_frame(y, i):
+            return pd.DataFrame({f"lag_{i}": [np.nan]*i + list(y[:-i])})
+
+        lags_list = [_lag_to_frame(self.y, i) for i in range(1, self.lags + 1, 1)]
+        lags = pd.concat(lags_list, axis=1)
+        self.X = pd.concat([self.X, lags], axis=1)
 
         idx = ~self.X[f"lag_{self.lags}"].isna()
         self.date_time = self.date_time[idx]
-        self.X = self.X[idx]
-        self.y = self.y[idx]
-        
+        self.X = self.X[idx].reset_index(drop=True)
+        self.y = self.y[idx].reset_index(drop=True)
+
     def _train_test_split(self):
         self.Xtrain = np.array(self.X.iloc[:-self.test_size,:])
         self.ytrain = np.array(self.y[:-self.test_size]).reshape(-1, 1)
