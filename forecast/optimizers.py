@@ -28,7 +28,7 @@ def LinearRegression_optimizer(trial):
 @optimizer(Ridge)
 def Ridge_optimizer(trial):
     params = {
-        "alpha": trial.suggest_float("ridge_alpha", 0.1, 2, step=0.1),
+        "alpha": trial.suggest_float("ridge_alpha", 0.1, 10, step=0.1),
         "positive": trial.suggest_categorical("ridge_positive", [True, False]),
         "solver": "auto"
         }
@@ -37,7 +37,7 @@ def Ridge_optimizer(trial):
 @optimizer(Lasso)
 def Lasso_optimizer(trial):
     params = {
-        "alpha": trial.suggest_float("lasso_alpha", 0.1, 2, step=0.1),
+        "alpha": trial.suggest_float("lasso_alpha", 0.1, 10, step=0.1),
         'warm_start': trial.suggest_categorical("lasso_warm_start", [True, False]),
         "positive": trial.suggest_categorical("lasso_positive", [True, False]),
         "selection": trial.suggest_categorical("lasso_selection", ["cyclic", "random"])
@@ -47,7 +47,7 @@ def Lasso_optimizer(trial):
 @optimizer(ElasticNet)
 def ElasticNet_optimizer(trial):
     params = {
-        "alpha": trial.suggest_float("elastic_alpha", 0.1, 2, step=0.1),
+        "alpha": trial.suggest_float("elastic_alpha", 0.1, 10, step=0.1),
         "l1_ratio": trial.suggest_float("elastic_l1_ratio", 0.1, 1, step=0.1),
         'warm_start': trial.suggest_categorical("elastic_warm_start", [True, False]),
         "positive": trial.suggest_categorical("elastic_positive", [True, False]),
