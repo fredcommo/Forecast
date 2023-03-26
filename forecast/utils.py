@@ -2,14 +2,13 @@ import pandas as pd
 from pandas.api.types import is_datetime64_any_dtype as is_datetime
 import numpy as np
 
-def date_to_timestamp(df, date_col = "Date Time"):
+def date_to_timestamp(dates):
     """
-    Transform dates to datetime, then timestamp in sec
+    Transform dates to datetime format if not already, then to timestamps in sec
     """
-    date_time = df[date_col]
-    if not is_datetime(date_time):
-        date_time = pd.to_datetime(df[date_col])
-    return date_time.map(pd.Timestamp.timestamp)
+    if not is_datetime(dates):
+        dates = pd.to_datetime(dates)
+    return dates.map(pd.Timestamp.timestamp)
 
 ###########################################
 # A series of utils to turn timestamps into sin/cos signals

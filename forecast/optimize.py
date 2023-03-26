@@ -49,9 +49,6 @@ def objective(trial, Xtrain, ytrain, test_size, model_list, njobs):
     classifier_optimizer = f"{classifier_name}_optimizer"
     classifier_obj = eval(classifier_optimizer)(trial)
 
-    Xtrain = np.array(Xtrain)
-    ytrain = np.array(ytrain).reshape(-1, 1)
-    
     # Scoring method:
     score = cross_val_score(
         classifier_obj,
@@ -132,20 +129,41 @@ def train_best_model(self):
     print(best_params)
 
     model = eval(best_model)(**best_params)
-    Xtrain = np.array(self.get_Xtrain())
-    ytrain = np.array(self.get_ytrain()).reshape(-1, 1)
-    model.fit(Xtrain, ytrain)
+    model.fit(self.get_Xtrain(), self.get_ytrain())
 
     self.model = model
 
+
 def predict(self, what="train"):
+    if what not in ["train", "test"]:
+        print("'what' must be one of 'train', 'test'")
+        return None
+
     model = self.model
     if what == "train":
-        return model.predict(np.array(self.get_Xtrain())).reshape(-1, 1)
+        X = self.get_Xtrain()
     elif what == "test":
-        return model.predict(np.array(self.get_Xtest())).reshape(-1, 1)
-    else:
-        return None
+        X = self.get_Xtest()
+
+    return model.predict(X).reshape(-1, 1)
+
+
+def predict_future(self):
+    yhat_futures = np.zeros((self.future_period, 1))
+    model = self.model
+    X = self.get_Xfuture()
+
+    for i in range(self.future_period):
+        x = X[i].reshape(1, -1)
+        yhat = model.predict(x)
+        yhat_futures[i] = yhat
+
+        z = zip(range(i+1, X.shape[0]), range(self.lags))
+        for z1, z2 in z:
+            X[z1, z2] = yhat
+
+    return yhat_futures
+
 
 def plot(self):
 
@@ -156,14 +174,20 @@ def plot(self):
 
     y = self.get_ytest()
     yhat = self.predict("test")
+    yhat_future = self.predict_future()
+    wape_ = wape(y, yhat)
     date_time = self.date_time
     
+    x1 = date_time[-self.test_size - self.future_period : -self.future_period]
+    x2 = date_time[-self.future_period:]
+
     plt.figure(figsize=(18, 8))
 
-    plt.plot(date_time[-self.test_size:], y, linewidth=3, label="Observed")
-    plt.plot(date_time[-self.test_size:], yhat, linewidth=3, c='orange', label="predicted")
+    plt.plot(x1, y, linewidth=3, label="Observed")
+    plt.plot(x1, yhat, linewidth=3, c='orange', label="predicted")
+    plt.scatter(x2, yhat_future, s=120, c='green', label="future")
 
-    title = f"Best model: {best_model}, Best metrics (CV): {best_value:.4f}, WAPE: {wape(y, yhat):.3f}"
+    title = f"Best model: {best_model}, Best metrics (CV): {best_value:.4f}, WAPE: {wape_:.3f}"
     plt.title(title, fontsize=22)
     plt.xlabel('Time', fontsize=18)
     plt.xticks(fontsize=14)
