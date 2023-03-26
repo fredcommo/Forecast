@@ -57,9 +57,9 @@ def objective(trial, Xtrain, ytrain, test_size, model_list, njobs):
         classifier_obj,
         Xtrain, ytrain,
         n_jobs=njobs,
-#         scoring="neg_mean_squared_error",
-#         scoring="neg_mean_absolute_percentage_error",
-        scoring=make_scorer(wape, greater_is_better=True),
+        # scoring="neg_mean_squared_error",
+        scoring="neg_mean_absolute_percentage_error",
+        # scoring=make_scorer(wape, greater_is_better=True),
         cv=TimeSeriesSplit(n_splits=5, test_size=test_size),
         error_score=0
     )
