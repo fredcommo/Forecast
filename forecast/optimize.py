@@ -8,7 +8,7 @@ import xgboost as xgb
 XGBReg = xgb.XGBRegressor
 
 from sklearn.model_selection import cross_val_score, TimeSeriesSplit
-from sklearn.metrics import make_scorer
+# from sklearn.metrics import make_scorer
 
 from forecast.optimizers import(
     LinearRegression_optimizer,
@@ -17,8 +17,6 @@ from forecast.optimizers import(
     ElasticNet_optimizer,
     XGBReg_optimizer
 )
-
-from forecast.metrics import wape
 
 #############################################################################
 # Uncomment/comment the line below if you want/don't want to print jobs on terminal:
@@ -172,11 +170,14 @@ def plot(self):
     best_params = study.best_params
     best_model = best_params.pop('classifier')
 
+    date_time = self.date_time
     y = self.get_ytest()
     yhat = self.predict("test")
     yhat_future = self.predict_future()
-    wape_ = wape(y, yhat)
-    date_time = self.date_time
+
+    wape_ = self.score(what="test", method="wape")
+    mape_ = self.score(what="test", method="mape")
+    wmape_ = self.score(what="test", method="wmape")
     
     x1 = date_time[-self.test_size - self.future_period : -self.future_period]
     x2 = date_time[-self.future_period:]
@@ -187,7 +188,7 @@ def plot(self):
     plt.plot(x1, yhat, linewidth=3, c='orange', label="predicted")
     plt.scatter(x2, yhat_future, s=120, c='green', label="future")
 
-    title = f"Best model: {best_model}, Best metrics (CV): {best_value:.4f}, WAPE: {wape_:.3f}"
+    title = f"Best model: {best_model}, Best metrics (CV): {best_value:.4f}, WAPE: {wape_:.3f}, MAPE: {mape_:.3f}, W-MAPE: {wmape_:.3f}"
     plt.title(title, fontsize=22)
     plt.xlabel('Time', fontsize=18)
     plt.xticks(fontsize=14)
