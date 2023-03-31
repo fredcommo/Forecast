@@ -4,16 +4,16 @@ import numpy as np
 
 from forecast.utils import (
     date_to_timestamp,
-    timestamp_to_daily_sin_cos,
-    timestamp_to_monthly_sin_cos,
-    timestamp_to_yearly_sin_cos,
     compute_daily_avg,
     compute_weekly_avg,
     compute_monthly_avg,
     compute_quarterly_avg
     )
-from forecast.metrics import wape
+
 from forecast.timeseries import TimeSeries
+from forecast.metrics import score, wape, mape, wmape
+
+from sklearn.preprocessing import StandardScaler
 
 def main():
     path = "forecast/data"
@@ -39,7 +39,12 @@ def main():
     #####################################################
     # Create a TimeSeries object
     #####################################################
-    ts = TimeSeries(df, y='T (degC)', lags=7*24)
+    # ts = TimeSeries(df, y='T (degC)', lags=7*24)
+    ts = TimeSeries(df, date_col="Date Time", y='T (degC)',
+                    datetime_transform= ["weekly", "yearly"],
+                    lags=24, future_period=12, future_freq="hours",
+                    test_size=24)
+    
     print(f"n rows: {ts.get_Xtrain().shape[0]}")
     print(f"n features: {ts.get_Xtrain().shape[1] - 1}\n")
 
@@ -47,17 +52,24 @@ def main():
     # Define the list of models to optimize
     #####################################################
     # Current available models: "LinearRegression", "XGBReg", "Ridge", "ElasticNet", "XGBReg"
-    model_list=["Ridge"]
+    model_list=["XGBReg", "Lasso", "Ridge", "ElasticNet"]
     print("Testing:\n-", "\n- ".join(model_list))
 
     #####################################################
     # Optimize, then compute and plot predictions on test set
     #####################################################
 
-    ts.optimize(model_list=model_list, timeout=2*60*60, n_trials=50)
+    ts.optimize(model_list=model_list, timeout=2*60*60, n_trials=200)
     ts.train_best_model()
-    yhat_futures = ts.predict_future()
-    print(f"Performance on future predictions: {wape(real_futures, yhat_futures)}")
+    # yhat_futures = ts.predict_future()
+    # wape_ = wape(real_futures, yhat_futures)
+    # mape_ = mape(real_futures, yhat_futures)
+    # wmape_ = wmape(real_futures, yhat_futures)
+
+    # print(f"WAPE on future predictions: {wape_:.6f}")
+    # print(f"MAPE on future predictions: {mape_:.6f}")
+    # print(f"weighted MAPE on future predictions: {wmape_:.6f}")
+
     ts.plot()
 
 
