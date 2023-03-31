@@ -17,9 +17,10 @@ from forecast.optimize import(
     train_best_model,
     predict,
     predict_future,
-    wape,
     plot
 )
+
+from forecast.metrics import score
 
 class TimeSeries():
     def __init__(self, df, y, date_col="Date Time",
@@ -27,6 +28,9 @@ class TimeSeries():
                  lags=16, test_size=24,
                  future_period=12, future_freq="hours"):
         
+        df.sort_values(by=date_col, inplace=True)
+        df = df.reset_index(drop=True)
+
         self.date_time = df[date_col] if is_datetime(df[date_col]) else pd.to_datetime(df[date_col])
         self.y = df[y]
         self.X = df.drop(columns = [y, date_col])
@@ -144,5 +148,5 @@ TimeSeries.get_best_model = get_best_model
 TimeSeries.train_best_model = train_best_model
 TimeSeries.predict = predict
 TimeSeries.predict_future = predict_future
-TimeSeries.wape = wape
+TimeSeries.score = score
 TimeSeries.plot = plot
