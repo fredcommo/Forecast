@@ -52,7 +52,7 @@ def Lasso_optimizer(trial):
 def ElasticNet_optimizer(trial):
     params = {
         "alpha": trial.suggest_float("elastic_alpha", 2, 10000, step=2),
-        "l1_ratio": trial.suggest_float("elastic_l1_ratio", 0.1, 1, step=0.1),
+        "l1_ratio": trial.suggest_float("elastic_l1_ratio", 0.01, 1, step=0.01),
         'warm_start': True, # trial.suggest_categorical("elastic_warm_start", [True, False]),
         "positive": trial.suggest_categorical("elastic_positive", [True, False]),
         "selection": trial.suggest_categorical("elastic_selection", ["cyclic", "random"]),
@@ -64,8 +64,8 @@ def ElasticNet_optimizer(trial):
 @optimizer(XGBReg)
 def XGBReg_optimizer(trial):
     params = {
-        "learning_rate": 0.25, # trial.suggest_float("xgbr_learning_rate", 0.1, 1, step=0.1),
-        "n_estimators": 500, # trial.suggest_categorical("xgbr_n_estimators", [100, 200, 500]),
+        "learning_rate": trial.suggest_float("xgbr_learning_rate", 0.01, 1, step=0.01),
+        "n_estimators": trial.suggest_categorical("xgbr_n_estimators", [200, 500, 1000]),
         "booster": "gblinear",
         "reg_alpha": trial.suggest_float("xgbr_reg_alpha", 0.1, 1, step=0.1),
         "reg_lambda": trial.suggest_float("xgbr_reg_lambda", 0.1, 1, step=0.1)
